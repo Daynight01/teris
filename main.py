@@ -12,11 +12,9 @@ clock = pygame.time.Clock()
 
 def grid():
     for x in range(10):
-        pygame.draw.rect(screen, (200, 200, 200), pygame.Rect((x*45 + 225, 855, 45, 45)), 2)
-        print(x,0)
-
-        # for y in range(20):
-        #     pygame.draw.rect(screen, (200, 200, 200), pygame.Rect((x*45 + 225, y*45 + 45, 45, 45)), 2)
+        for y in range(20):
+            pygame.draw.rect(screen, (200, 200, 200), pygame.Rect((x*45 + 225, y*45, 45, 45)), 2)
+            print(x+1,y+1)
 
     pygame.display.update()
 
