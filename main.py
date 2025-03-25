@@ -9,12 +9,13 @@ screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 run = True
 pygame.display.set_caption("Tetris")
 clock = pygame.time.Clock()
+tile = []
 
 def grid():
     for x in range(10):
         for y in range(20):
             pygame.draw.rect(screen, (200, 200, 200), pygame.Rect((x*45 + 225, y*45, 45, 45)), 2)
-            print(x+1,y+1)
+            tile.append((x+1,y+1, False))
 
     pygame.display.update()
 
