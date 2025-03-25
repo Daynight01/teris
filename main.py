@@ -1,3 +1,1 @@
-#HI
-print("hi")
-print("this is tetris")
+import time, random, os, math
