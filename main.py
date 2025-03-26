@@ -1,39 +1,60 @@
-import time, random, os, math, pygame, sys
+import pygame
+
 pygame.init()
 
-SCREEN_HEIGHT=900
-SCREEN_WIDTH=900
+SCREEN_HEIGHT = 900
+SCREEN_WIDTH = 900
+TILE_SIZE = 45
+GRID_WIDTH = 10
+GRID_HEIGHT = 20
 
-screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
-run = True
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Tetris")
 clock = pygame.time.Clock()
-tile = []
 
-def grid():
-    for x in range(10):
-        for y in range(20):
-            pygame.draw.rect(screen, (200, 200, 200), pygame.Rect((x*45 + 225, y*45, 45, 45)), 2)
-            tile.append((x+1,y+1, False, (0, 0, 0, 255)))
-    pygame.display.update()
+tiles = []
 
-grid()
+def init_grid():
+    global tiles
+    tiles = []
+    for x in range(GRID_WIDTH):
+        for y in range(GRID_HEIGHT):
+            tiles.append({"x": x + 1, "y": y + 1, "color": (0, 0, 0)})
 
-def update(screen, square_list, size=45):
-    for x, y, active, color in square_list:
-        if active:
-            pygame.draw.rect(screen, color, (x, y, size, size))
+def draw_grid():
+    screen.fill((0, 0, 0))
+    for tile in tiles:
+        x, y, color = tile["x"], tile["y"], tile["color"]
+        pygame.draw.rect(screen, color, pygame.Rect(
+            (x - 1) * TILE_SIZE + 225,
+            (GRID_HEIGHT - y) * TILE_SIZE,
+            TILE_SIZE, TILE_SIZE
+        ))
+        pygame.draw.rect(screen, (200, 200, 200), pygame.Rect(
+            (x - 1) * TILE_SIZE + 225,  
+            (GRID_HEIGHT - y) * TILE_SIZE,  
+            TILE_SIZE, TILE_SIZE
+        ), 2)
 
+def change_tile(x, y, color):
+    for tile in tiles:
+        if tile["x"] == x and tile["y"] == y:
+            tile["color"] = color
+            break
 
+init_grid()
+
+run = True
 while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-    
-    update(screen, tile)
-    
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                change_tile(1, 1, (255, 0, 0))
 
     #Updates
+    draw_grid()
     pygame.display.update()
     clock.tick(60)
