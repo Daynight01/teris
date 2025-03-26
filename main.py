@@ -73,6 +73,8 @@ while run:
     current_time = pygame.time.get_ticks()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            print("")
+            print(tiles)
             pygame.quit()
             exit()
 
@@ -90,15 +92,11 @@ while run:
     if current_time - last_fall_time > FALL_TIME:
         move_tile(0, -1)
         last_fall_time = current_time
-        # detects when a tile hits the floor and where, and fixes it to the grid map. (Bug: This only works once.)
+        # detects when a tile hits the floor and where, and fixes it to the grid map.
         if active_tile["y"]==1:
             if skip1==0:
-                landing_pos = (active_tile["x"]*20)-20
-                print(tiles[landing_pos])
-                print("")
-                tiles[landing_pos]=active_tile
-                print(tiles[landing_pos])
-                active_tile = new_tile
+                change_tile(active_tile["x"],active_tile["y"],active_tile["color"])
+                active_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
                 skip1+=1
             else:
                 skip1-=1
