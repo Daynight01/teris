@@ -1,5 +1,5 @@
 import pygame
-# I'm going to try to make a heightmap for the tiles. - Dwyn
+
 pygame.init()
 
 SCREEN_HEIGHT = 900
@@ -27,7 +27,7 @@ def init_grid():
     tiles = []
     for x in range(GRID_WIDTH):
         for y in range(GRID_HEIGHT):
-            tiles.append({"x": x + 1, "y": y + 1, "color": (0, 0, 0)})
+            tiles.append({"x": x + 1, "y": y + 1, "color": (0, 0, 0), "space_bellow_filled": False})
 
 def draw_grid():
     screen.fill((0, 0, 0))
@@ -54,7 +54,13 @@ def change_tile(x, y, color):
     for tile in tiles:
         if tile["x"] == x and tile["y"] == y:
             tile["color"] = color
+            print(tile)
+
+        if tile["x"] == x and tile["y"] == y+1:
+            tile["space_bellow_filled"] = True
+            print(tile)
             break
+            
 
 def move_tile(dx, dy):
     new_x = active_tile["x"] + dx
@@ -90,10 +96,14 @@ while run:
         
     #Shift Down
     if current_time - last_fall_time > FALL_TIME:
-        move_tile(0, -1)
+        # height map has been made
+        current_space = (active_tile["x"]*20)-20 + (active_tile["y"])-1
+        print(tiles[current_space])
+        if tiles[current_space]["space_bellow_filled"]==False:
+            move_tile(0, -1)
         last_fall_time = current_time
         # detects when a tile hits the floor and where, and fixes it to the grid map.
-        if active_tile["y"]==1:
+        if active_tile["y"]==1 or tiles[current_space]["space_bellow_filled"]==True:
             if skip1==0:
                 change_tile(active_tile["x"],active_tile["y"],active_tile["color"])
                 active_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
