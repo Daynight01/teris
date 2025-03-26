@@ -52,6 +52,12 @@ def draw_grid():
         TILE_SIZE, TILE_SIZE
     ))
 
+def get_tile_at(x, y):
+    for tile in tiles:
+        if tile["x"] == x and tile["y"] == y:
+            return tile
+    return None
+
 def change_tile(x, y, color):
     for tile in tiles:
         if tile["x"] == x and tile["y"] == y:
@@ -73,6 +79,13 @@ def move_tile(dx, dy):
         active_tile["x"] = new_x
     if 1 <= new_y <= GRID_HEIGHT:
         active_tile["y"] = new_y
+
+def hard_drop():
+    while active_tile["y"] > 1:
+        below_tile = get_tile_at(active_tile["x"], active_tile["y"] - 1)
+        if below_tile and below_tile["space_filled"]:
+            break
+        active_tile["y"] -= 1
 
 init_grid()
 print(tiles)
@@ -108,6 +121,10 @@ while run:
             if event.key == pygame.K_DOWN: 
                 if tiles[current_space]["space_bellow_filled"]==False and active_tile["y"]!=1:
                     move_tile(0, -1)
+                    last_fall_time = current_time
+            if event.key == pygame.K_SPACE:
+                if tiles[current_space]["space_bellow_filled"]==False and active_tile["y"]!=1:
+                    hard_drop()
                     last_fall_time = current_time
         
     #Shift Down
