@@ -7,8 +7,10 @@ SCREEN_WIDTH = 900
 TILE_SIZE = 45
 GRID_WIDTH = 10
 GRID_HEIGHT = 20
+
+# This might need to be changed if we want an actual level system
 FALL_TIME = 1000
-# MAP_MEMORY = []
+
 
 
 
