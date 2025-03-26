@@ -1,5 +1,5 @@
 import pygame
-# I'm going to try to make a heightmap for the tiles. - Dwyn
+
 pygame.init()
 
 SCREEN_HEIGHT = 900
@@ -27,7 +27,7 @@ def init_grid():
     tiles = []
     for x in range(GRID_WIDTH):
         for y in range(GRID_HEIGHT):
-            tiles.append({"x": x + 1, "y": y + 1, "color": (0, 0, 0), "space_bellow_filled": False})
+            tiles.append({"x": x + 1, "y": y + 1, "color": (0, 0, 0), "space_bellow_filled": False, "space_filled": False})
 
 def draw_grid():
     screen.fill((0, 0, 0))
@@ -54,6 +54,7 @@ def change_tile(x, y, color):
     for tile in tiles:
         if tile["x"] == x and tile["y"] == y:
             tile["color"] = color
+            tile["space_filled"] = True
             print(tile)
 
         if tile["x"] == x and tile["y"] == y+1:
@@ -78,6 +79,9 @@ run = True
 while run:
     current_time = pygame.time.get_ticks()
     current_space = (active_tile["x"]*20)-20 + (active_tile["y"])-1
+    space_right = (active_tile["x"]*20) + (active_tile["y"])-1
+    space_left = (active_tile["x"]*20)-40 + (active_tile["y"])-1
+    
     # print(current_time,last_fall_time)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -89,9 +93,11 @@ while run:
         #Movement
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                move_tile(-1, 0)
-            if event.key == pygame.K_RIGHT: 
-                move_tile(1, 0)
+                if tiles[space_left]["space_filled"]==False:
+                    move_tile(-1, 0)
+            if event.key == pygame.K_RIGHT:
+                if tiles[space_right]["space_filled"]==False: 
+                    move_tile(1, 0)
             if event.key == pygame.K_DOWN: 
                 if tiles[current_space]["space_bellow_filled"]==False and active_tile["y"]!=1:
                     move_tile(0, -1)
@@ -100,7 +106,9 @@ while run:
     #Shift Down
     if current_time - last_fall_time > FALL_TIME:
         # height map has been made
+        print(tiles[space_right])
         print(tiles[current_space])
+        print(tiles[space_left])
         if tiles[current_space]["space_bellow_filled"]==False:
             move_tile(0, -1)
         last_fall_time = current_time
