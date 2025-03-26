@@ -96,7 +96,12 @@ while run:
                 if tiles[space_left]["space_filled"]==False:
                     move_tile(-1, 0)
             if event.key == pygame.K_RIGHT:
-                if tiles[space_right]["space_filled"]==False: 
+                # This is here because the right wall is outside the tiles index, so it would crash without this.
+                try:
+                    right_wall_exception_catch = tiles[space_right]["space_filled"]
+                except:
+                    right_wall_exception_catch = True
+                if right_wall_exception_catch==False: 
                     move_tile(1, 0)
             if event.key == pygame.K_DOWN: 
                 if tiles[current_space]["space_bellow_filled"]==False and active_tile["y"]!=1:
@@ -106,7 +111,7 @@ while run:
     #Shift Down
     if current_time - last_fall_time > FALL_TIME:
         # height map has been made
-        print(tiles[space_right])
+        # print(tiles[space_right])
         print(tiles[current_space])
         print(tiles[space_left])
         if tiles[current_space]["space_bellow_filled"]==False:
