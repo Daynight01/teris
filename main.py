@@ -1,5 +1,5 @@
 import pygame
-# I'm going to make a heightmap for the tiles. - Dwyn
+# I'm going to try to make a heightmap for the tiles. - Dwyn
 pygame.init()
 
 SCREEN_HEIGHT = 900
@@ -8,12 +8,17 @@ TILE_SIZE = 45
 GRID_WIDTH = 10
 GRID_HEIGHT = 20
 FALL_TIME = 1000
+# MAP_MEMORY = []
+
+
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Tetris")
 clock = pygame.time.Clock()
 
+skip1=1
 tiles = []
+new_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
 active_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
 last_fall_time = pygame.time.get_ticks()
 
@@ -61,7 +66,8 @@ def move_tile(dx, dy):
         active_tile["y"] = new_y
 
 init_grid()
-
+print(tiles)
+print(active_tile)
 run = True
 while run:
     current_time = pygame.time.get_ticks()
@@ -84,7 +90,20 @@ while run:
     if current_time - last_fall_time > FALL_TIME:
         move_tile(0, -1)
         last_fall_time = current_time
-                
+        # detects when a tile hits the floor and where, and fixes it to the grid map. (Bug: This only works once.)
+        if active_tile["y"]==1:
+            if skip1==0:
+                landing_pos = (active_tile["x"]*20)-20
+                print(tiles[landing_pos])
+                print("")
+                tiles[landing_pos]=active_tile
+                print(tiles[landing_pos])
+                active_tile = new_tile
+                skip1+=1
+            else:
+                skip1-=1
+    
+    
 
     #Updates
     draw_grid()
