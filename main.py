@@ -1,5 +1,5 @@
 import pygame
-
+# I'm going to make a heightmap for the tiles. - Dwyn
 pygame.init()
 
 SCREEN_HEIGHT = 900
