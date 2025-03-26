@@ -1,5 +1,5 @@
 import pygame
-
+# I'm going to try to make a heightmap for the tiles. - Dwyn
 pygame.init()
 
 SCREEN_HEIGHT = 900
@@ -77,6 +77,8 @@ print(active_tile)
 run = True
 while run:
     current_time = pygame.time.get_ticks()
+    current_space = (active_tile["x"]*20)-20 + (active_tile["y"])-1
+    # print(current_time,last_fall_time)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             print("")
@@ -91,13 +93,13 @@ while run:
             if event.key == pygame.K_RIGHT: 
                 move_tile(1, 0)
             if event.key == pygame.K_DOWN: 
-                move_tile(0, -1)
-                last_fall_time = current_time
+                if tiles[current_space]["space_bellow_filled"]==False and active_tile["y"]!=1:
+                    move_tile(0, -1)
+                    last_fall_time = current_time
         
     #Shift Down
     if current_time - last_fall_time > FALL_TIME:
         # height map has been made
-        current_space = (active_tile["x"]*20)-20 + (active_tile["y"])-1
         print(tiles[current_space])
         if tiles[current_space]["space_bellow_filled"]==False:
             move_tile(0, -1)
