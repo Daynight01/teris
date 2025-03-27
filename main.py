@@ -96,11 +96,14 @@ def hard_drop():
         if below_tile and below_tile["space_filled"]:
             break
         active_tile["y"] -= 1
+    place_tile()
+
+def place_tile():
+    global active_tile
+    global last_fall_time
     change_tile(active_tile["x"], active_tile["y"], active_tile["color"])
     last_fall_time = 1000
     active_tile = {"x": 1, "y": GRID_HEIGHT + 1, "color": (255, 0, 0)}
-
-
 
 
 init_grid()
@@ -139,10 +142,8 @@ while run:
                     move_tile(0, -1)
                     last_fall_time = current_time
                 else:
-                    change_tile(active_tile["x"], active_tile["y"], active_tile["color"])
-                    last_fall_time = 1000
-                    active_tile = {"x": 1, "y": GRID_HEIGHT + 1, "color": (255, 0, 0)}
-                    
+                    place_tile()
+
             if event.key == pygame.K_SPACE:
                 if tiles[current_space]["space_bellow_filled"] == False and active_tile["y"] != 1:
                     hard_drop()
@@ -160,8 +161,7 @@ while run:
         # detects when a tile hits the floor and where, and fixes it to the grid map.
         if active_tile["y"] == 1 or tiles[current_space]["space_bellow_filled"] == True:
             if skip1 == 0:
-                change_tile(active_tile["x"], active_tile["y"], active_tile["color"])
-                active_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
+                place_tile()
                 skip1 += 1
             else:
                 skip1 -= 1
