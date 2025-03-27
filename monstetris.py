@@ -11,28 +11,27 @@ GRID_HEIGHT = 20
 # This might need to be changed if we want an actual level system
 FALL_TIME = 1000
 
-
-
-
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Tetris")
 clock = pygame.time.Clock()
 
-
-skip1=1
+skip1 = 1
 tiles = []
 new_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
 active_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
 last_fall_time = pygame.time.get_ticks()
 
-two_by_two = [{"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}, {"x": 2, "y": GRID_HEIGHT, "color": (255, 0, 0)}, {"x": 1, "y": GRID_HEIGHT-1, "color": (255, 0, 0)}, {"x": 2, "y": GRID_HEIGHT-1, "color": (255, 0, 0)}]
-print(two_by_two[0])
+shape=[{"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}, {"x": 2, "y": GRID_HEIGHT, "color": (255, 0, 0)}, {"x": 1, "y": GRID_HEIGHT-1, "color": (255, 0, 0)}, {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}]
+
+
 def init_grid():
     global tiles
     tiles = []
     for x in range(GRID_WIDTH):
         for y in range(GRID_HEIGHT):
-            tiles.append({"x": x + 1, "y": y + 1, "color": (0, 0, 0), "space_bellow_filled": False, "space_filled": False})
+            tiles.append(
+                {"x": x + 1, "y": y + 1, "color": (0, 0, 0), "can_move_down": True, "space_filled": False, "can_move_right": True, "can_move_left": True})
+
 
 def draw_grid():
     screen.fill((0, 0, 0))
@@ -44,23 +43,53 @@ def draw_grid():
             TILE_SIZE, TILE_SIZE
         ))
         pygame.draw.rect(screen, (200, 200, 200), pygame.Rect(
-            (x - 1) * TILE_SIZE + 225,  
-            (GRID_HEIGHT - y) * TILE_SIZE,  
+            (x - 1) * TILE_SIZE + 225,
+            (GRID_HEIGHT - y) * TILE_SIZE,
             TILE_SIZE, TILE_SIZE
         ), 2)
     # Draw active moving tile
-    for piece in range(len(two_by_two)):
-        pygame.draw.rect(screen, two_by_two[piece]["color"], pygame.Rect(
-            (two_by_two[piece]["x"] - 1) * TILE_SIZE + 225,  
-            (GRID_HEIGHT - two_by_two[piece]["y"]) * TILE_SIZE,  
-            TILE_SIZE, TILE_SIZE
-        ))
+    pygame.draw.rect(screen, active_tile["color"], pygame.Rect(
+        (active_tile["x"] - 1) * TILE_SIZE + 225,
+        (GRID_HEIGHT - active_tile["y"]) * TILE_SIZE,
+        TILE_SIZE, TILE_SIZE
+    ))
+
+
 
 def get_tile_at(x, y):
     for tile in tiles:
         if tile["x"] == x and tile["y"] == y:
             return tile
     return None
+
+def can_move():
+    movables_down = 0
+    movables_left = 0
+    movables_right = 0
+    for piece in range(len(shape)):
+        tile = get_tile_at(shape[piece]["x"],shape[piece]["y"])
+        if tile["can_move_down"] == True:
+            movables_down+=1
+        if tile["can_move_right"] == True:
+            movables_right+=1
+        if tile["can_move_left"] == True:
+            movables_left+=1
+    if movables_down == len(shape):
+        can_down = True
+    else:
+        can_down= False
+    if movables_left == len(shape):
+        can_left = True
+    else:
+        can_left = False
+    if movables_right == len(shape):
+        can_right = True
+    else:
+        can_right = False
+    return [can_left, can_right, can_down]
+
+
+
 
 def change_tile(x, y, color):
     for tile in tiles:
@@ -69,22 +98,21 @@ def change_tile(x, y, color):
             tile["space_filled"] = True
             print(tile)
 
-        if tile["x"] == x and tile["y"] == y+1:
-            tile["space_bellow_filled"] = True
+        if tile["x"] == x and tile["y"] == y + 1:
+            tile["can_move_down"] = False
             print(tile)
             break
-            
+
 
 def move_tile(dx, dy):
-    for piece in range(len(two_by_two)):
-        new_x = two_by_two[piece]["x"] + dx
-        new_y = two_by_two[piece]["y"] + dy
+    new_x = active_tile["x"] + dx
+    new_y = active_tile["y"] + dy
 
-        if 1 <= new_x <= GRID_WIDTH:
-            two_by_two[piece]["x"] = new_x
-        if 1 <= new_y <= GRID_HEIGHT:
-            two_by_two[piece]["y"] = new_y
-    print(two_by_two)
+    if 1 <= new_x <= GRID_WIDTH:
+        active_tile["x"] = new_x
+    if 1 <= new_y <= GRID_HEIGHT:
+        active_tile["y"] = new_y
+
 
 def hard_drop():
     while active_tile["y"] > 1:
@@ -93,13 +121,21 @@ def hard_drop():
             break
         active_tile["y"] -= 1
 
+
+
+
+
 init_grid()
 print(tiles)
 print(active_tile)
 run = True
 while run:
+    moves = can_move()
     current_time = pygame.time.get_ticks()
-    
+    current_space = (active_tile["x"] * 20) - 20 + (active_tile["y"]) - 1
+    space_right = (active_tile["x"] * 20) + (active_tile["y"]) - 1
+    space_left = (active_tile["x"] * 20) - 40 + (active_tile["y"]) - 1
+
     # print(current_time,last_fall_time)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -108,56 +144,47 @@ while run:
             pygame.quit()
             exit()
 
-        #Movement
+        # Movement
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                if tiles[space_left]["space_filled"]==False:
+                if moves[0] == True:
                     move_tile(-1, 0)
             if event.key == pygame.K_RIGHT:
                 # This is here because the right wall is outside the tiles index, so it would crash without this.
                 try:
-                    right_wall_exception_catch = tiles[space_right]["space_filled"]
+                    right_wall_exception_catch = moves[1]
                 except:
-                    right_wall_exception_catch = True
-                if right_wall_exception_catch==False: 
+                    right_wall_exception_catch = False
+                if right_wall_exception_catch == True:
                     move_tile(1, 0)
-            if event.key == pygame.K_DOWN: 
-                if tiles[current_space]["space_bellow_filled"]==False and active_tile["y"]!=1:
+            if event.key == pygame.K_DOWN:
+                if moves[2] == True and active_tile["y"] != 1:
                     move_tile(0, -1)
                     last_fall_time = current_time
             if event.key == pygame.K_SPACE:
-                if tiles[current_space]["space_bellow_filled"]==False and active_tile["y"]!=1:
+                if moves[2] == True and active_tile["y"] != 1:
                     hard_drop()
-                    last_fall_time = current_time-FALL_TIME
-        
-    #Shift Down
-    if current_time - last_fall_time > FALL_TIME:
-        can_move_shape=[True,True,True,True]
-        for piece in range(len(two_by_two)):
-            current_space = (two_by_two[piece]["x"]*20)-20 + (two_by_two[piece]["y"])-1
-            space_right = (two_by_two[piece]["x"]*20) + (two_by_two[piece]["y"])-1
-            space_left = (two_by_two[piece]["x"]*20)-40 + (two_by_two[piece]["y"])-1
-            # height map has been made
-            # print(tiles[space_right])
-            print(tiles[current_space])
-            print(tiles[space_left])
-            if tiles[current_space]["space_bellow_filled"]==False:
-                can_move_shape[piece] = True
-            # detects when a tile hits the floor and where, and fixes it to the grid map.
-    
-            if active_tile["y"]==1 or tiles[current_space]["space_bellow_filled"]==True:
-                if skip1==0:
-                    for piece in range(len(two_by_two)):
-                        change_tile(two_by_two[piece]["x"],two_by_two[piece]["y"],two_by_two[piece]["color"])
-                    two_by_two = [{"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}, {"x": 2, "y": GRID_HEIGHT, "color": (255, 0, 0)}, {"x": 1, "y": GRID_HEIGHT-1, "color": (255, 0, 0)}, {"x": 2, "y": GRID_HEIGHT-1, "color": (255, 0, 0)}]
-                    skip1+=1
-                else:
-                    skip1-=1
-        if can_move_shape==[True,True,True,True]:
-            move_tile(0, -1)
-            last_fall_time = current_time
+                    last_fall_time = current_time
 
-    #Updates
+    # Shift Down
+    if current_time - last_fall_time > FALL_TIME:
+        # height map has been made
+        # print(tiles[space_right])
+        print(tiles[current_space])
+        print(tiles[space_left])
+        if moves[2] == True:
+            move_tile(0, -1)
+        last_fall_time = current_time
+        # detects when a tile hits the floor and where, and fixes it to the grid map.
+        if active_tile["y"] == 1 or moves[2] == False:
+            if skip1 == 0:
+                change_tile(active_tile["x"], active_tile["y"], active_tile["color"])
+                active_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
+                skip1 += 1
+            else:
+                skip1 -= 1
+
+    # Updates
     draw_grid()
     pygame.display.update()
     clock.tick(60)
