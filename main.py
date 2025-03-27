@@ -138,6 +138,11 @@ while run:
                 if tiles[current_space]["space_bellow_filled"] == False and active_tile["y"] != 1:
                     move_tile(0, -1)
                     last_fall_time = current_time
+                else:
+                    change_tile(active_tile["x"], active_tile["y"], active_tile["color"])
+                    last_fall_time = 1000
+                    active_tile = {"x": 1, "y": GRID_HEIGHT + 1, "color": (255, 0, 0)}
+                    
             if event.key == pygame.K_SPACE:
                 if tiles[current_space]["space_bellow_filled"] == False and active_tile["y"] != 1:
                     hard_drop()
