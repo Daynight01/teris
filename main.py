@@ -21,17 +21,23 @@ new_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
 active_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
 last_fall_time = pygame.time.get_ticks()
 
-def create_shape(relative_coords, color, base_x=1, base_y=GRID_HEIGHT):
+def create_shape(relative_coords, color, base_x=GRID_WIDTH // 2, base_y=GRID_HEIGHT):
     return [{"x": base_x + coord[0], "y": base_y + coord[1], "color": color} for coord in relative_coords]
 
-two_by_two = create_shape([(0, 0), (1, 0), (0, -1), (1, -1)],(255, 0, 0))
-three_by_one = create_shape([(0, 0), (1, 0), (2, 0), (0, -1)],(0, 255, 0))
-three_by_two = create_shape([(0, 0), (1, 0), (2, 0), (1, -1)],(0, 0, 255))
+
+square_shape = create_shape([(0, 0), (1, 0), (0, -1), (1, -1)], (255, 255, 0))
+line_shape = create_shape([(0, 0), (1, 0), (2, 0), (3, 0)], (0, 255, 255))
+t_shape = create_shape([(0, 0), (1, 0), (2, 0), (1, -1)], (128, 0, 128))
+l_shape = create_shape([(0, 0), (0, -1), (0, -2), (1, 0)], (255, 165, 0))
+reverse_l_shape = create_shape([(1, 0), (1, -1), (1, -2), (0, 0)], (0, 0, 255))
+z_shape = create_shape([(0, 0), (1, 0), (1, -1), (2, -1)], (255, 0, 0))
+reverse_z_shape = create_shape([(2, 0), (1, 0), (1, -1), (0, -1)], (0, 255, 0))
 
 
 # Add more shapes as needed
 
-shapes = random.choice([two_by_two, three_by_one, three_by_two])
+shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
+print(shapes)
 # Add more shapes to the list as needed
 def init_grid():
     global tiles
@@ -121,7 +127,8 @@ def change_tile(shape):
         for piece in shape:
             piece["x"] += x_offset
             piece["y"] += y_offset
-    shapes = random.choice([two_by_two, three_by_one, three_by_two])
+    shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
+    print(shapes)
     
 
 
@@ -183,15 +190,40 @@ while run:
         # Movement
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                if can_move("left",shapes):
-                    move_tile(-1, 0,shapes)
+                if can_move("left", shapes):
+                    move_tile(-1, 0, shapes)
             if event.key == pygame.K_RIGHT:
-                if can_move("right",shapes):
-                    move_tile(1, 0,shapes)
+                if can_move("right", shapes):
+                    move_tile(1, 0, shapes)
             if event.key == pygame.K_DOWN:
-                if can_move("down",shapes):
-                    move_tile(0, -1,shapes)
+                if can_move("down", shapes):
+                    move_tile(0, -1, shapes)
                     last_fall_time = current_time
+            if event.key == pygame.K_r:
+                rotated_shape = []
+                pivot = shapes[0]
+                for piece in shapes:
+                    new_x = pivot["x"] - (piece["y"] - pivot["y"])
+                    new_y = pivot["y"] + (piece["x"] - pivot["x"])
+                    rotated_shape.append({"x": new_x, "y": new_y, "color": piece["color"]})
+                
+                if all(1 <= piece["x"] <= GRID_WIDTH and 1 <= piece["y"] <= GRID_HEIGHT and 
+                       (not get_tile_at(piece["x"], piece["y"]) or not get_tile_at(piece["x"], piece["y"])["space_filled"])
+                       for piece in rotated_shape):
+                    shapes = rotated_shape
+
+            if event.key == pygame.K_e:
+                rotated_shape = []
+                pivot = shapes[0]
+                for piece in shapes:
+                    new_x = pivot["x"] + (piece["y"] - pivot["y"])
+                    new_y = pivot["y"] - (piece["x"] - pivot["x"])
+                    rotated_shape.append({"x": new_x, "y": new_y, "color": piece["color"]})
+                
+                if all(1 <= piece["x"] <= GRID_WIDTH and 1 <= piece["y"] <= GRID_HEIGHT and 
+                       (not get_tile_at(piece["x"], piece["y"]) or not get_tile_at(piece["x"], piece["y"])["space_filled"])
+                       for piece in rotated_shape):
+                    shapes = rotated_shape
             
             # dev mod to move the tile up
             if event.key == pygame.K_UP:
@@ -220,6 +252,27 @@ while run:
             else:
                 skip1 -= 1
         last_fall_time = current_time
+
+    
+    # Check for full rows
+    full_rows = []
+    for y in range(1, GRID_HEIGHT + 1):
+        if all(get_tile_at(x, y)["space_filled"] for x in range(1, GRID_WIDTH + 1)):
+            full_rows.append(y)
+    
+    # Shift rows down when a full row is cleared
+    for row in full_rows:
+        for y in range(row, GRID_HEIGHT + 1):
+            for tile in tiles:
+                if tile["y"] == y:
+                    tile_above = get_tile_at(tile["x"], y + 1)
+                    if tile_above:
+                        tile["color"] = tile_above["color"]
+                        tile["space_filled"] = tile_above["space_filled"]
+                    else:
+                        tile["color"] = (0, 0, 0)
+                        tile["space_filled"] = False
+    
 
     # Updates
     draw_grid()
