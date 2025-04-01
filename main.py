@@ -231,9 +231,7 @@ while run:
             if event.key == pygame.K_ESCAPE:
                 run = False
             if event.key == pygame.K_SPACE:
-                if can_move("down",shapes):
-                    hard_drop()
-                    last_fall_time = current_time
+                hard_drop()    
 
     # Shift Down
     if current_time - last_fall_time > FALL_TIME:
