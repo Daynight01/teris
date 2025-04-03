@@ -3,7 +3,9 @@ import random
 
 pygame.init()
 
-
+# Download as a zip to make it easier to run.
+BACKGROUND = pygame.image.load("maryo.jpg")
+BACKGROUND = pygame.transform.scale(BACKGROUND, (900, 900))
 
 SCREEN_HEIGHT = 900
 SCREEN_WIDTH = 900
@@ -29,17 +31,17 @@ active_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
 last_fall_time = pygame.time.get_ticks()
 
 
-def create_shape(relative_coords, color, base_x=GRID_WIDTH // 2, base_y=GRID_HEIGHT):
-    return [{"x": base_x + coord[0], "y": base_y + coord[1], "color": color} for coord in relative_coords]
+def create_shape(relative_coords, base_x=GRID_WIDTH // 2, base_y=GRID_HEIGHT):
+    return [{"x": base_x + coord[0], "y": base_y + coord[1]} for coord in relative_coords]
 
 
-square_shape = create_shape([(0, 0), (1, 0), (0, -1), (1, -1)], (255, 255, 0))
-line_shape = create_shape([(0, 0), (1, 0), (2, 0), (3, 0)], (0, 255, 255))
-t_shape = create_shape([(0, 0), (1, 0), (2, 0), (1, -1)], (128, 0, 128))
-l_shape = create_shape([(0, 0), (0, -1), (0, -2), (1, 0)], (255, 165, 0))
-reverse_l_shape = create_shape([(1, 0), (1, -1), (1, -2), (0, 0)], (0, 0, 255))
-z_shape = create_shape([(0, 0), (1, 0), (1, -1), (2, -1)], (255, 0, 0))
-reverse_z_shape = create_shape([(2, 0), (1, 0), (1, -1), (0, -1)], (0, 255, 0))
+square_shape = create_shape([(0, 0), (1, 0), (0, -1), (1, -1)])
+line_shape = create_shape([(0, 0), (1, 0), (2, 0), (3, 0)])
+t_shape = create_shape([(0, 0), (1, 0), (2, 0), (1, -1)])
+l_shape = create_shape([(0, 0), (0, -1), (0, -2), (1, 0)])
+reverse_l_shape = create_shape([(1, 0), (1, -1), (1, -2), (0, 0)])
+z_shape = create_shape([(0, 0), (1, 0), (1, -1), (2, -1)])
+reverse_z_shape = create_shape([(2, 0), (1, 0), (1, -1), (0, -1)])
 
 # Add more shapes as needed
 
@@ -65,13 +67,13 @@ def draw_active(shape):
 
 
 def draw_grid():
-    screen.fill((0,0,0))
+    screen.blit(BACKGROUND, (0, 0))
     screen.blit(pygame.image.load("tetristestpiece.bmp"), (0,0))
     for tile in tiles:
         x, y, color = tile["x"], tile["y"], tile["color"]
-        screen.blit(pygame.image.load(f"tetris-test-piece2.bmp"),(
-            (x - 1) * TILE_SIZE + 225,
-            (GRID_HEIGHT - y) * TILE_SIZE))
+        # screen.blit(pygame.image.load(f"tetris-test-piece2.bmp"),(
+        #     (x - 1) * TILE_SIZE + 225,
+        #     (GRID_HEIGHT - y) * TILE_SIZE))
         pygame.draw.rect(screen, (200, 200, 200), pygame.Rect(
             (x - 1) * TILE_SIZE + 225,
             (GRID_HEIGHT - y) * TILE_SIZE,
