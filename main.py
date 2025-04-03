@@ -1,12 +1,20 @@
 import pygame
 import random
+import requests
+import requests.structures
+import shutil
 pygame.init()
+
+requests.get
 
 SCREEN_HEIGHT = 900
 SCREEN_WIDTH = 900
 TILE_SIZE = 45
 GRID_WIDTH = 10
 GRID_HEIGHT = 20
+
+# I haven't added a score system yet, I just added a variable for it
+SCORE = 0
 
 # This might need to be changed if we want an actual level system
 FALL_TIME = 1000
@@ -25,6 +33,8 @@ def create_shape(relative_coords, color, base_x=GRID_WIDTH // 2, base_y=GRID_HEI
     return [{"x": base_x + coord[0], "y": base_y + coord[1], "color": color} for coord in relative_coords]
 
 
+
+
 square_shape = create_shape([(0, 0), (1, 0), (0, -1), (1, -1)], (255, 255, 0))
 line_shape = create_shape([(0, 0), (1, 0), (2, 0), (3, 0)], (0, 255, 255))
 t_shape = create_shape([(0, 0), (1, 0), (2, 0), (1, -1)], (128, 0, 128))
@@ -36,7 +46,7 @@ reverse_z_shape = create_shape([(2, 0), (1, 0), (1, -1), (0, -1)], (0, 255, 0))
 
 # Add more shapes as needed
 
-shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
+shapes = random.choice([square_shape])
 print(shapes)
 # Add more shapes to the list as needed
 def init_grid():
@@ -80,27 +90,31 @@ def get_tile_at(x, y):
             return tile
     return None
 
-def can_move(direction,shape):
-    if direction=="left":
+def can_move(direction, shape):
+    if direction == "left":
         for piece in shape:
             if piece["x"] == 1:
                 return False
             tile = get_tile_at(piece["x"] - 1, piece["y"])
             if tile and tile["space_filled"]:
                 return False
-    elif direction=="right":
+    elif direction == "right":
         for piece in shape:
             if piece["x"] == GRID_WIDTH:
                 return False
             tile = get_tile_at(piece["x"] + 1, piece["y"])
             if tile and tile["space_filled"]:
                 return False
-    elif direction=="down":
+    elif direction == "down":
         for piece in shape:
             if piece["y"] == 1:
                 return False
             tile = get_tile_at(piece["x"], piece["y"] - 1)
             if tile and tile["space_filled"]:
+                return False
+    elif direction == "up":
+        for piece in shape:
+            if piece["y"] == GRID_HEIGHT:
                 return False
     return True
 
@@ -116,17 +130,14 @@ def change_tile(shape):
                 tile["space_filled"] = True
                 print(tile, piece)
     # Reset the shape's position to the top after it is fixed to the grid
-    for piece in shape:
-        # Calculate the offset of the shape's pieces relative to the top-left corner
-        min_x = min(piece["x"] for piece in shape)
-        min_y = min(piece["y"] for piece in shape)
-        x_offset = 1 - min_x
-        y_offset = GRID_HEIGHT - min_y
-
-        # Reset the shape's position while maintaining its original structure
-        for piece in shape:
-            piece["x"] += x_offset
-            piece["y"] += y_offset
+    while can_move("up", shape):
+        move_tile(0, 1, shape)
+    
+    # Center the shape using the top-left tile as the origin point
+    min_x = min(piece["x"] for piece in shape)
+    offset_x = (GRID_WIDTH // 2) - min_x
+    for _ in range(abs(offset_x)):
+        move_tile(1 if offset_x > 0 else -1, 0, shape)
     shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
     print(shapes)
     
@@ -231,7 +242,7 @@ while run:
             if event.key == pygame.K_ESCAPE:
                 run = False
             if event.key == pygame.K_SPACE:
-                hard_drop()    
+                hard_drop() 
 
     # Shift Down
     if current_time - last_fall_time > FALL_TIME:
