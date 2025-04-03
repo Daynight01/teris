@@ -59,7 +59,7 @@ def init_grid():
 
 def draw_active(shape):
     for piece in shape:
-        screen.blit(pygame.image.load("tetristestpiece.bmp"),(
+        screen.blit(pygame.image.load(f"tetristestpiece.bmp"),(
             (piece["x"] - 1) * TILE_SIZE + 225,
             (GRID_HEIGHT - piece["y"]) * TILE_SIZE))
 
@@ -69,11 +69,9 @@ def draw_grid():
     screen.blit(pygame.image.load("tetristestpiece.bmp"), (0,0))
     for tile in tiles:
         x, y, color = tile["x"], tile["y"], tile["color"]
-        pygame.draw.rect(screen, color, pygame.Rect(
+        screen.blit(pygame.image.load(f"tetris-test-piece2.bmp"),(
             (x - 1) * TILE_SIZE + 225,
-            (GRID_HEIGHT - y) * TILE_SIZE,
-            TILE_SIZE, TILE_SIZE
-        ))
+            (GRID_HEIGHT - y) * TILE_SIZE))
         pygame.draw.rect(screen, (200, 200, 200), pygame.Rect(
             (x - 1) * TILE_SIZE + 225,
             (GRID_HEIGHT - y) * TILE_SIZE,
