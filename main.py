@@ -3,9 +3,13 @@ import random
 
 pygame.init()
 
-# Download as a zip to make it easier to run.
 BACKGROUND = pygame.image.load("maryo.jpg")
 BACKGROUND = pygame.transform.scale(BACKGROUND, (900, 900))
+BOARD = pygame.image.load("tetris-test-piece2.bmp")
+BOARD2 = pygame.image.load("tetris-test-piece2.bmp")
+ACTIVE = pygame.image.load("tetristestpiece.bmp")
+
+BOARD.set_alpha(0)
 
 SCREEN_HEIGHT = 900
 SCREEN_WIDTH = 900
@@ -56,12 +60,12 @@ def init_grid():
     for x in range(GRID_WIDTH):
         for y in range(GRID_HEIGHT):
             tiles.append(
-                {"x": x + 1, "y": y + 1, "color": (0, 0, 0), "space_filled": False})
+                {"x": x + 1, "y": y + 1, "color": BOARD, "space_filled": False})
 
 
 def draw_active(shape):
     for piece in shape:
-        screen.blit(pygame.image.load(f"tetristestpiece.bmp"),(
+        screen.blit(ACTIVE,(
             (piece["x"] - 1) * TILE_SIZE + 225,
             (GRID_HEIGHT - piece["y"]) * TILE_SIZE))
 
@@ -71,9 +75,9 @@ def draw_grid():
     screen.blit(pygame.image.load("tetristestpiece.bmp"), (0,0))
     for tile in tiles:
         x, y, color = tile["x"], tile["y"], tile["color"]
-        # screen.blit(pygame.image.load(f"tetris-test-piece2.bmp"),(
-        #     (x - 1) * TILE_SIZE + 225,
-        #     (GRID_HEIGHT - y) * TILE_SIZE))
+        screen.blit(tile["color"],(
+            (x - 1) * TILE_SIZE + 225,
+            (GRID_HEIGHT - y) * TILE_SIZE))
         pygame.draw.rect(screen, (200, 200, 200), pygame.Rect(
             (x - 1) * TILE_SIZE + 225,
             (GRID_HEIGHT - y) * TILE_SIZE,
@@ -124,7 +128,7 @@ def change_tile(shape):
     for piece in shape:
         for tile in tiles:
             if tile["x"] == piece["x"] and tile["y"] == piece["y"]:
-                tile["color"]= screen.blit(pygame.image.load("tetristestpiece.bmp"),(tile["x"],tile["y"]))
+                tile["color"]= BOARD2
                 tile["space_filled"] = True
                 print(tile, piece)
     # Reset the shape's position to the top after it is fixed to the grid
