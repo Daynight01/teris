@@ -125,6 +125,7 @@ def can_move(direction, shape):
 
 def change_tile(shape):
     global shapes
+    global SCORE
     for piece in shape:
         for tile in tiles:
             if tile["x"] == piece["x"] and tile["y"] == piece["y"]:
@@ -134,6 +135,7 @@ def change_tile(shape):
     # Reset the shape's position to the top after it is fixed to the grid
     while can_move("up", shape):
         move_tile(0, 1, shape)
+    SCORE+=1
 
     # Center the shape using the top-left tile as the origin point
     min_x = min(piece["x"] for piece in shape)
@@ -180,7 +182,7 @@ while run:
         font = pygame.font.Font(None, 74)
         sub_font = pygame.font.Font(None, 36)
         text = font.render("Game Over", True, (255, 0, 0))
-        sub_text = sub_font.render(f"Current Time: {current_time}", True, (255, 0, 0))
+        sub_text = sub_font.render(f"Final Score: {SCORE}", True, (255, 0, 0))
         screen.fill((0, 0, 0))
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
         screen.blit(sub_text,
@@ -215,7 +217,7 @@ while run:
                 for piece in shapes:
                     new_x = pivot["x"] - (piece["y"] - pivot["y"])
                     new_y = pivot["y"] + (piece["x"] - pivot["x"])
-                    rotated_shape.append({"x": new_x, "y": new_y, "color": piece["color"]})
+                    rotated_shape.append({"x": new_x, "y": new_y})
 
                 if all(1 <= piece["x"] <= GRID_WIDTH and 1 <= piece["y"] <= GRID_HEIGHT and
                        (not get_tile_at(piece["x"], piece["y"]) or not get_tile_at(piece["x"], piece["y"])[
@@ -229,7 +231,7 @@ while run:
                 for piece in shapes:
                     new_x = pivot["x"] + (piece["y"] - pivot["y"])
                     new_y = pivot["y"] - (piece["x"] - pivot["x"])
-                    rotated_shape.append({"x": new_x, "y": new_y, "color": piece["color"]})
+                    rotated_shape.append({"x": new_x, "y": new_y})
 
                 if all(1 <= piece["x"] <= GRID_WIDTH and 1 <= piece["y"] <= GRID_HEIGHT and
                        (not get_tile_at(piece["x"], piece["y"]) or not get_tile_at(piece["x"], piece["y"])[
@@ -268,6 +270,7 @@ while run:
     for y in range(1, GRID_HEIGHT + 1):
         if all(get_tile_at(x, y)["space_filled"] for x in range(1, GRID_WIDTH + 1)):
             full_rows.append(y)
+            SCORE +=1
 
     # Shift rows down when a full row is cleared
     for row in full_rows:
@@ -279,7 +282,7 @@ while run:
                         tile["color"] = tile_above["color"]
                         tile["space_filled"] = tile_above["space_filled"]
                     else:
-                        tile["color"] = (0, 0, 0)
+                        tile["color"] = tile["color"]
                         tile["space_filled"] = False
 
     # Updates
