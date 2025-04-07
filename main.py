@@ -27,6 +27,10 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Tetris")
 clock = pygame.time.Clock()
 
+move_hist_x = 0
+move_hist_y = 0
+
+
 
 skip1 = 1
 tiles = []
@@ -126,6 +130,7 @@ def can_move(direction, shape):
 def change_tile(shape):
     global shapes
     global SCORE
+    global move_hist_x, move_hist_y
     for piece in shape:
         for tile in tiles:
             if tile["x"] == piece["x"] and tile["y"] == piece["y"]:
@@ -133,20 +138,15 @@ def change_tile(shape):
                 tile["space_filled"] = True
                 print(tile, piece)
     # Reset the shape's position to the top after it is fixed to the grid
-    while can_move("up", shape):
-        move_tile(0, 1, shape)
-    SCORE+=1
-
-    # Center the shape using the top-left tile as the origin point
-    min_x = min(piece["x"] for piece in shape)
-    offset_x = (GRID_WIDTH // 2) - min_x
-    for _ in range(abs(offset_x)):
-        move_tile(1 if offset_x > 0 else -1, 0, shape)
+    move_tile(-move_hist_x,-move_hist_y,shape)
+    move_hist_x = 0
+    move_hist_y = 0
     shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
     print(shapes)
 
 
 def move_tile(dx, dy, shape):
+    global move_hist_x, move_hist_y
     for piece in shape:
         new_x = piece["x"] + dx
         new_y = piece["y"] + dy
@@ -155,6 +155,8 @@ def move_tile(dx, dy, shape):
             piece["x"] = new_x
         if 1 <= new_y <= GRID_HEIGHT:
             piece["y"] = new_y
+    move_hist_x += dx
+    move_hist_y += dy
     # Update the active tile position
 
 
