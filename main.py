@@ -272,10 +272,12 @@ while run:
     for y in range(1, GRID_HEIGHT + 1):
         if all(get_tile_at(x, y)["space_filled"] for x in range(1, GRID_WIDTH + 1)):
             full_rows.append(y)
-            SCORE +=1
+            SCORE +=10
+
 
     # Shift rows down when a full row is cleared
     for row in full_rows:
+        move_hist_y += 1
         for y in range(row, GRID_HEIGHT + 1):
             for tile in tiles:
                 if tile["y"] == y:
