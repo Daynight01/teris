@@ -53,7 +53,7 @@ reverse_z_shape = create_shape([(2, 0), (1, 0), (1, -1), (0, -1)])
 
 # Add more shapes as needed
 
-shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
+shapes = random.choice([line_shape])
 print(shapes)
 
 
@@ -145,14 +145,16 @@ def rows():
     global SCORE, move_hist_y, shapes
     # Check for full rows
     full_rows = []
+
     for y in range(1, GRID_HEIGHT + 1):
         if all(get_tile_at(x, y)["space_filled"] for x in range(1, GRID_WIDTH + 1)):
             full_rows.append(y)
             SCORE += 10
-
+    print(full_rows)
+    move_hist_y -= len(full_rows)
     # Shift rows down when a full row is cleared
     for row in full_rows:
-        move_hist_y += 1
+
         for y in range(row, GRID_HEIGHT + 1):
 
             for tile in tiles:
@@ -164,8 +166,7 @@ def rows():
                     else:
                         tile["color"] = tile["color"]
                         tile["space_filled"] = False
-    while can_move("up", shapes):
-        move_tile(0, 1, shapes)
+
 
 def change_tile(shape):
     global shapes
@@ -179,12 +180,15 @@ def change_tile(shape):
                 print(tile, piece)
     # Reset the shape's position to the top after it is fixed to the grid
     rows()
-    move_tile(-move_hist_x,0,shape)
-    while can_move("up", shape):
-        move_tile(0,1,shape)
+    print(move_hist_x, move_hist_y)
+    move_tile(-move_hist_x,-move_hist_y,shape)
+    while can_move("up",shapes):
+        move_tile(0,1,shapes)
+    
+
     move_hist_x = 0
     move_hist_y = 0
-    shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
+    shapes = random.choice([line_shape])
     print(shapes)
 
 
@@ -195,7 +199,7 @@ def hard_drop():
     global last_fall_time, move_hist_y
     while can_move("down", shapes):
         move_tile(0, -1, shapes)
-        move_hist_y += 1
+
     change_tile(shapes)
     last_fall_time = current_time
 
@@ -308,13 +312,12 @@ while run:
         if all(get_tile_at(x, y)["space_filled"] for x in range(1, GRID_WIDTH + 1)):
             full_rows.append(y)
             SCORE +=10
-
-
+    move_hist_y -= len(full_rows)
     # Shift rows down when a full row is cleared
     for row in full_rows:
 
         for y in range(row, GRID_HEIGHT + 1):
-            move_hist_y += 1
+
             for tile in tiles:
                 if tile["y"] == y:
                     tile_above = get_tile_at(tile["x"], y + 1)
