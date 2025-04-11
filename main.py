@@ -23,7 +23,7 @@ GRID_HEIGHT = 20
 SCORE = 0
 
 # This might need to be changed if we want an actual level system
-FALL_TIME = 1000
+FALL_TIME = 1000 - SCORE
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Tetris")
@@ -173,7 +173,7 @@ def rows():
 def change_tile(shape):
     global shapes
     global SCORE
-    global move_hist_x, move_hist_y
+    global move_hist_x, move_hist_y, FALL_TIME
     for piece in shape:
         for tile in tiles:
             if tile["x"] == piece["x"] and tile["y"] == piece["y"]:
@@ -197,6 +197,7 @@ def change_tile(shape):
     z_shape = create_shape([(0, 0), (1, 0), (1, -1), (2, -1)], "green_piece.jpg")
     reverse_z_shape = create_shape([(2, 0), (1, 0), (1, -1), (0, -1)], "red_piece.bmp")
     shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
+    FALL_TIME = 1000 - SCORE
     print(shapes)
 
 
