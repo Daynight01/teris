@@ -3,13 +3,15 @@ import random
 
 pygame.init()
 
-BACKGROUND = pygame.image.load("maryo.jpg")
+BACKGROUND = pygame.image.load("rat.png")
 BACKGROUND = pygame.transform.scale(BACKGROUND, (900, 900))
-BOARD = pygame.image.load("blue_piece.bmp")
+BOARD = pygame.image.load("maryo.jpg")
 BOARD2 = pygame.image.load("blue_piece.bmp")
 ACTIVE = pygame.image.load("red_piece.bmp")
 
-BOARD.set_alpha(0)
+BOARD = pygame.transform.scale(BOARD, (45,45))
+BOARD.set_alpha(100)
+
 
 SCREEN_HEIGHT = 900
 SCREEN_WIDTH = 900
@@ -152,6 +154,8 @@ def rows():
     move_hist_y -= len(full_rows)
     # Shift rows down when a full row is cleared
     for row in full_rows:
+        if can_move("up", shapes):
+            move_tile(0,1,shapes)
 
         for y in range(row, GRID_HEIGHT + 1):
 
@@ -180,11 +184,18 @@ def change_tile(shape):
     rows()
     print(move_hist_x, move_hist_y)
     move_tile(-move_hist_x, -move_hist_y, shape)
-    while can_move("up", shapes):
-        move_tile(0, 1, shapes)
 
+    SCORE += 1
     move_hist_x = 0
     move_hist_y = 0
+    shapes.clear()
+    square_shape = create_shape([(0, 0), (1, 0), (0, -1), (1, -1)], "yellow_piece.jpg")
+    line_shape = create_shape([(0, 0), (1, 0), (2, 0), (3, 0)], "blue_piece.bmp")
+    t_shape = create_shape([(0, 0), (1, 0), (2, 0), (1, -1)], "pourple_piece.jpg")
+    l_shape = create_shape([(0, 0), (0, -1), (0, -2), (1, 0)], "orange_piece.jpg")
+    reverse_l_shape = create_shape([(1, 0), (1, -1), (1, -2), (0, 0)], "pink_piece.jpg")
+    z_shape = create_shape([(0, 0), (1, 0), (1, -1), (2, -1)], "green_piece.jpg")
+    reverse_z_shape = create_shape([(2, 0), (1, 0), (1, -1), (0, -1)], "red_piece.bmp")
     shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
     print(shapes)
 
@@ -307,7 +318,8 @@ while run:
     move_hist_y -= len(full_rows)
     # Shift rows down when a full row is cleared
     for row in full_rows:
-
+        if can_move("up", shapes):
+            move_tile(0,1,shapes)
         for y in range(row, GRID_HEIGHT + 1):
 
             for tile in tiles:
