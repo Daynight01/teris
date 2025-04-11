@@ -3,6 +3,14 @@ import random
 
 pygame.init()
 
+BACKGROUND = pygame.image.load("rat.png")
+BACKGROUND = pygame.transform.scale(BACKGROUND, (900, 900))
+BOARD = pygame.image.load("maryo.jpg")
+BOARD2 = pygame.image.load("blue_piece.bmp")
+ACTIVE = pygame.image.load("red_piece.bmp")
+
+BOARD = pygame.transform.scale(BOARD, (45,45))
+BOARD.set_alpha(100)
 
 
 SCREEN_HEIGHT = 900
@@ -21,6 +29,8 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Tetris")
 clock = pygame.time.Clock()
 
+move_hist_x = 0
+move_hist_y = 0
 
 skip1 = 1
 tiles = []
@@ -33,17 +43,17 @@ def create_shape(relative_coords, color, base_x=GRID_WIDTH // 2, base_y=GRID_HEI
     return [{"x": base_x + coord[0], "y": base_y + coord[1], "color": color} for coord in relative_coords]
 
 
-square_shape = create_shape([(0, 0), (1, 0), (0, -1), (1, -1)], (255, 255, 0))
-line_shape = create_shape([(0, 0), (1, 0), (2, 0), (3, 0)], (0, 255, 255))
-t_shape = create_shape([(0, 0), (1, 0), (2, 0), (1, -1)], (128, 0, 128))
-l_shape = create_shape([(0, 0), (0, -1), (0, -2), (1, 0)], (255, 165, 0))
-reverse_l_shape = create_shape([(1, 0), (1, -1), (1, -2), (0, 0)], (0, 0, 255))
-z_shape = create_shape([(0, 0), (1, 0), (1, -1), (2, -1)], (255, 0, 0))
-reverse_z_shape = create_shape([(2, 0), (1, 0), (1, -1), (0, -1)], (0, 255, 0))
+square_shape = create_shape([(0, 0), (1, 0), (0, -1), (1, -1)], "yellow_piece.jpg")
+line_shape = create_shape([(0, 0), (1, 0), (2, 0), (3, 0)], "blue_piece.bmp")
+t_shape = create_shape([(0, 0), (1, 0), (2, 0), (1, -1)], "pourple_piece.jpg")
+l_shape = create_shape([(0, 0), (0, -1), (0, -2), (1, 0)], "orange_piece.jpg")
+reverse_l_shape = create_shape([(1, 0), (1, -1), (1, -2), (0, 0)], "pink_piece.jpg")
+z_shape = create_shape([(0, 0), (1, 0), (1, -1), (2, -1)], "green_piece.jpg")
+reverse_z_shape = create_shape([(2, 0), (1, 0), (1, -1), (0, -1)], "red_piece.bmp")
 
 # Add more shapes as needed
 
-shapes = random.choice([square_shape])
+shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
 print(shapes)
 
 
@@ -54,22 +64,21 @@ def init_grid():
     for x in range(GRID_WIDTH):
         for y in range(GRID_HEIGHT):
             tiles.append(
-                {"x": x + 1, "y": y + 1, "color": (0, 0, 0), "space_filled": False})
+                {"x": x + 1, "y": y + 1, "color": BOARD, "space_filled": False})
 
 
 def draw_active(shape):
     for piece in shape:
-        screen.blit(pygame.image.load(f"tetristestpiece.bmp"),(
+        screen.blit(pygame.image.load(piece["color"]), (
             (piece["x"] - 1) * TILE_SIZE + 225,
             (GRID_HEIGHT - piece["y"]) * TILE_SIZE))
 
 
 def draw_grid():
-    screen.fill((0,0,0))
-    screen.blit(pygame.image.load("tetristestpiece.bmp"), (0,0))
+    screen.blit(BACKGROUND, (0, 0))
     for tile in tiles:
         x, y, color = tile["x"], tile["y"], tile["color"]
-        screen.blit(pygame.image.load(f"tetris-test-piece2.bmp"),(
+        screen.blit(tile["color"], (
             (x - 1) * TILE_SIZE + 225,
             (GRID_HEIGHT - y) * TILE_SIZE))
         pygame.draw.rect(screen, (200, 200, 200), pygame.Rect(
@@ -117,28 +126,8 @@ def can_move(direction, shape):
     return True
 
 
-def change_tile(shape):
-    global shapes
-    for piece in shape:
-        for tile in tiles:
-            if tile["x"] == piece["x"] and tile["y"] == piece["y"]:
-                tile["color"]= screen.blit(pygame.image.load("tetristestpiece.bmp"),(tile["x"],tile["y"]))
-                tile["space_filled"] = True
-                print(tile, piece)
-    # Reset the shape's position to the top after it is fixed to the grid
-    while can_move("up", shape):
-        move_tile(0, 1, shape)
-
-    # Center the shape using the top-left tile as the origin point
-    min_x = min(piece["x"] for piece in shape)
-    offset_x = (GRID_WIDTH // 2) - min_x
-    for _ in range(abs(offset_x)):
-        move_tile(1 if offset_x > 0 else -1, 0, shape)
-    shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
-    print(shapes)
-
-
 def move_tile(dx, dy, shape):
+    global move_hist_x, move_hist_y
     for piece in shape:
         new_x = piece["x"] + dx
         new_y = piece["y"] + dy
@@ -147,12 +136,75 @@ def move_tile(dx, dy, shape):
             piece["x"] = new_x
         if 1 <= new_y <= GRID_HEIGHT:
             piece["y"] = new_y
+    move_hist_x += dx
+    move_hist_y += dy
     # Update the active tile position
 
 
+def rows():
+    global SCORE, move_hist_y, shapes
+    # Check for full rows
+    full_rows = []
+
+    for y in range(1, GRID_HEIGHT + 1):
+        if all(get_tile_at(x, y)["space_filled"] for x in range(1, GRID_WIDTH + 1)):
+            full_rows.append(y)
+            SCORE += 10
+    print(full_rows)
+    move_hist_y -= len(full_rows)
+    # Shift rows down when a full row is cleared
+    for row in full_rows:
+        if can_move("up", shapes):
+            move_tile(0,1,shapes)
+
+        for y in range(row, GRID_HEIGHT + 1):
+
+            for tile in tiles:
+                if tile["y"] == y:
+                    tile_above = get_tile_at(tile["x"], y + 1)
+                    if tile_above:
+                        tile["color"] = tile_above["color"]
+                        tile["space_filled"] = tile_above["space_filled"]
+                    else:
+                        tile["color"] = tile["color"]
+                        tile["space_filled"] = False
+
+
+def change_tile(shape):
+    global shapes
+    global SCORE
+    global move_hist_x, move_hist_y
+    for piece in shape:
+        for tile in tiles:
+            if tile["x"] == piece["x"] and tile["y"] == piece["y"]:
+                tile["color"] = pygame.image.load(piece["color"])
+                tile["space_filled"] = True
+                print(tile, piece)
+    # Reset the shape's position to the top after it is fixed to the grid
+    rows()
+    print(move_hist_x, move_hist_y)
+    move_tile(-move_hist_x, -move_hist_y, shape)
+
+    SCORE += 1
+    move_hist_x = 0
+    move_hist_y = 0
+    shapes.clear()
+    square_shape = create_shape([(0, 0), (1, 0), (0, -1), (1, -1)], "yellow_piece.jpg")
+    line_shape = create_shape([(0, 0), (1, 0), (2, 0), (3, 0)], "blue_piece.bmp")
+    t_shape = create_shape([(0, 0), (1, 0), (2, 0), (1, -1)], "pourple_piece.jpg")
+    l_shape = create_shape([(0, 0), (0, -1), (0, -2), (1, 0)], "orange_piece.jpg")
+    reverse_l_shape = create_shape([(1, 0), (1, -1), (1, -2), (0, 0)], "pink_piece.jpg")
+    z_shape = create_shape([(0, 0), (1, 0), (1, -1), (2, -1)], "green_piece.jpg")
+    reverse_z_shape = create_shape([(2, 0), (1, 0), (1, -1), (0, -1)], "red_piece.bmp")
+    shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
+    print(shapes)
+
+
 def hard_drop():
+    global last_fall_time, move_hist_y
     while can_move("down", shapes):
         move_tile(0, -1, shapes)
+
     change_tile(shapes)
     last_fall_time = current_time
 
@@ -174,7 +226,7 @@ while run:
         font = pygame.font.Font(None, 74)
         sub_font = pygame.font.Font(None, 36)
         text = font.render("Game Over", True, (255, 0, 0))
-        sub_text = sub_font.render(f"Current Time: {current_time}", True, (255, 0, 0))
+        sub_text = sub_font.render(f"Final Score: {SCORE}", True, (255, 0, 0))
         screen.fill((0, 0, 0))
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - text.get_height() // 2))
         screen.blit(sub_text,
@@ -262,10 +314,14 @@ while run:
     for y in range(1, GRID_HEIGHT + 1):
         if all(get_tile_at(x, y)["space_filled"] for x in range(1, GRID_WIDTH + 1)):
             full_rows.append(y)
-
+            SCORE += 10
+    move_hist_y -= len(full_rows)
     # Shift rows down when a full row is cleared
     for row in full_rows:
+        if can_move("up", shapes):
+            move_tile(0,1,shapes)
         for y in range(row, GRID_HEIGHT + 1):
+
             for tile in tiles:
                 if tile["y"] == y:
                     tile_above = get_tile_at(tile["x"], y + 1)
@@ -273,7 +329,7 @@ while run:
                         tile["color"] = tile_above["color"]
                         tile["space_filled"] = tile_above["space_filled"]
                     else:
-                        tile["color"] = (0, 0, 0)
+                        tile["color"] = tile["color"]
                         tile["space_filled"] = False
 
     # Updates
