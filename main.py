@@ -1,6 +1,6 @@
 import pygame
 import random
-# We can't remember who did what, we each have responsibility for everything.
+# I am Person 1.
 pygame.init()
 
 BACKGROUND = pygame.image.load("rat.png")
@@ -19,10 +19,8 @@ TILE_SIZE = 45
 GRID_WIDTH = 10
 GRID_HEIGHT = 20
 
-# I haven't added a score system yet, I just added a variable for it
 SCORE = 0
 
-# This might need to be changed if we want an actual level system
 FALL_TIME = 1000 - SCORE
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -38,7 +36,7 @@ new_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
 active_tile = {"x": 1, "y": GRID_HEIGHT, "color": (255, 0, 0)}
 last_fall_time = pygame.time.get_ticks()
 
-
+# Person 1
 def create_shape(relative_coords, color, base_x=GRID_WIDTH // 2, base_y=GRID_HEIGHT):
     return [{"x": base_x + coord[0], "y": base_y + coord[1], "color": color} for coord in relative_coords]
 
@@ -51,13 +49,11 @@ reverse_l_shape = create_shape([(1, 0), (1, -1), (1, -2), (0, 0)], "pink_piece.j
 z_shape = create_shape([(0, 0), (1, 0), (1, -1), (2, -1)], "green_piece.jpg")
 reverse_z_shape = create_shape([(2, 0), (1, 0), (1, -1), (0, -1)], "red_piece.bmp")
 
-# Add more shapes as needed
 
 shapes = random.choice([square_shape, line_shape, t_shape, l_shape, reverse_l_shape, z_shape, reverse_z_shape])
 print(shapes)
 
-
-# Add more shapes to the list as needed
+# Person 2
 def init_grid():
     global tiles
     tiles = []
@@ -66,14 +62,14 @@ def init_grid():
             tiles.append(
                 {"x": x + 1, "y": y + 1, "color": BOARD, "space_filled": False})
 
-
+# Person 2 and 1
 def draw_active(shape):
     for piece in shape:
         screen.blit(pygame.image.load(piece["color"]), (
             (piece["x"] - 1) * TILE_SIZE + 225,
             (GRID_HEIGHT - piece["y"]) * TILE_SIZE))
 
-
+# Person 2
 def draw_grid():
     screen.blit(BACKGROUND, (0, 0))
     for tile in tiles:
@@ -89,14 +85,14 @@ def draw_grid():
     # Draw active moving tile
     draw_active(shapes)
 
-
+# Person 2
 def get_tile_at(x, y):
     for tile in tiles:
         if tile["x"] == x and tile["y"] == y:
             return tile
     return None
 
-
+# Person 1
 def can_move(direction, shape):
     if direction == "left":
         for piece in shape:
@@ -125,7 +121,7 @@ def can_move(direction, shape):
                 return False
     return True
 
-
+# Person 1 and 2
 def move_tile(dx, dy, shape):
     global move_hist_x, move_hist_y
     for piece in shape:
@@ -140,7 +136,7 @@ def move_tile(dx, dy, shape):
     move_hist_y += dy
     # Update the active tile position
 
-
+# Person 1
 def rows():
     global SCORE, move_hist_y, shapes
     # Check for full rows
@@ -169,7 +165,7 @@ def rows():
                         tile["color"] = tile["color"]
                         tile["space_filled"] = False
 
-
+# Person 2 and 1
 def change_tile(shape):
     global shapes
     global SCORE
@@ -200,7 +196,7 @@ def change_tile(shape):
     FALL_TIME = 1000 - SCORE
     print(shapes)
 
-
+# Person 2
 def hard_drop():
     global last_fall_time, move_hist_y
     while can_move("down", shapes):
@@ -218,11 +214,13 @@ while run:
     current_time = pygame.time.get_ticks()
 
     # Check if the shape spawns inside any tiles with "space_filled": True
+    # Person 1
     inside_fixed_space = any(
         get_tile_at(piece["x"], piece["y"])["space_filled"]
         for piece in shapes
         if get_tile_at(piece["x"], piece["y"])
     )
+    # Person 1
     if inside_fixed_space:
         font = pygame.font.Font(None, 74)
         sub_font = pygame.font.Font(None, 36)
@@ -237,7 +235,7 @@ while run:
         run = False
         print("Current Time:", current_time)
 
-    # print(current_time,last_fall_time)
+    # Person 1
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             print("")
@@ -245,6 +243,7 @@ while run:
             exit()
 
         # Movement
+        # Person 2 and 1
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 if can_move("left", shapes):
@@ -293,6 +292,7 @@ while run:
                 hard_drop()
 
                 # Shift Down
+    # Person 2 and 1
     if current_time - last_fall_time > FALL_TIME:
         print("")
         print("New Turn")
@@ -311,6 +311,7 @@ while run:
         last_fall_time = current_time
 
     # Check for full rows
+    # Person 1
     full_rows = []
     for y in range(1, GRID_HEIGHT + 1):
         if all(get_tile_at(x, y)["space_filled"] for x in range(1, GRID_WIDTH + 1)):
@@ -318,6 +319,7 @@ while run:
             SCORE += 10
     move_hist_y -= len(full_rows)
     # Shift rows down when a full row is cleared
+    # Person 1
     for row in full_rows:
         if can_move("up", shapes):
             move_tile(0,1,shapes)
