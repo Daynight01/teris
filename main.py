@@ -5,9 +5,9 @@ import random
 
 pygame.init()
 
-BACKGROUND = pygame.image.load("rat.png")
+BACKGROUND = pygame.image.load("background.png")
 BACKGROUND = pygame.transform.scale(BACKGROUND, (900, 900))
-BOARD = pygame.image.load("maryo.jpg")
+BOARD = pygame.image.load("tile.jpg")
 BOARD2 = pygame.image.load("blue_piece.bmp")
 ACTIVE = pygame.image.load("red_piece.bmp")
 
