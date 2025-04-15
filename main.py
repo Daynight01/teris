@@ -1,6 +1,8 @@
+# I am Person 2.
+
 import pygame
 import random
-# I am Person 2.
+
 pygame.init()
 
 BACKGROUND = pygame.image.load("rat.png")
