@@ -1,6 +1,6 @@
 import pygame
 import random
-
+# We can't remember who did what, we each have responsibility for everything.
 pygame.init()
 
 BACKGROUND = pygame.image.load("rat.png")
